@@ -12,5 +12,6 @@ namespace KAEGoalWebAPI.Data
         public DbSet<Coin> Coins { get; set; }
         public DbSet<CoinTransaction> CoinTransactions { get; set; }
         public DbSet<CoinType> CoinTypes { get; set; }
+        public DbSet<Reward> Rewards { get; set; }
     }
 }
