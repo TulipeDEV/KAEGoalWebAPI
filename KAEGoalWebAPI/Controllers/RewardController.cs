@@ -34,6 +34,27 @@ namespace KAEGoalWebAPI.Controllers
             return Ok(RewardRequestModels);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRewardById(int id)
+        {
+            var reward = await _rewardService.GetRewardByIdAsync(id);
+            if (reward == null)
+            {
+                return NotFound(new { message = "Reward not found" });
+            }
+
+            var rewardRequestModel = new RewardRequestModel
+            {
+                Id = reward.Id,
+                Name = reward.Name,
+                Description = reward.Description,
+                Cost = reward.Cost,
+                ImageUrl = reward.ImageUrl
+            };
+
+            return Ok(rewardRequestModel);
+        }
+
         [HttpPost("add")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddReward([FromBody] AddRewardModel model)
@@ -61,24 +82,34 @@ namespace KAEGoalWebAPI.Controllers
             return Ok("Reward deleted successfully");
         }
 
-        [HttpPost("redeem")]
+        [HttpPost("redeem/{rewardId}")]
         [Authorize(Roles = "User, Admin")]
-        public async Task<IActionResult> RedeemReward([FromBody] RewardRedeemModel model)
+        public async Task<IActionResult> RedeemReward(int rewardId)
         {
+            // Validate the rewardId from the route
+            if (rewardId <= 0)
+            {
+                return BadRequest(new { message = "Invalid reward ID" });
+            }
+
+            // Get the user ID from the claims
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdClaim, out int userId))
             {
-                return Unauthorized("Invalid user ID");
+                return Unauthorized(new { message = "Invalid or missing user ID" });
             }
 
-            var result = await _rewardService.RedeemRewardAsync(userId,model.RewardId);
+            // Attempt to redeem the reward
+            var result = await _rewardService.RedeemRewardAsync(userId, rewardId);
             if (!result.Success)
             {
-                return BadRequest(result.Message);
+                return BadRequest(new { message = result.Message });
             }
 
+            // Return success response
             return Ok(new { message = result.Message });
         }
+
 
         [HttpPut]
         [Authorize(Roles = "Admin")]

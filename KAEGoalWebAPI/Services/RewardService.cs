@@ -18,6 +18,12 @@ namespace KAEGoalWebAPI.Services
             return await _DbContext.Rewards.ToListAsync();
         }
 
+        public async Task<Reward> GetRewardByIdAsync(int id)
+        {
+            return await _DbContext.Rewards.FindAsync(id);
+        }
+
+
         public async Task<(bool Success, string Message)> RedeemRewardAsync(int userId, int rewardId)
         {
             var user = await _DbContext.Users
