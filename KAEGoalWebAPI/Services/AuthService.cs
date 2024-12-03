@@ -19,16 +19,22 @@ namespace KAEGoalWebAPI.Services
             _Configuration = configuration;
         }
 
-        public async Task<string> Register(string username, string password, string role)
+        public async Task<string> Register(string username, string password, string role, string firstname,string lastname, string displayname, string profilepictureurl)
         {
             var existingUser = await _DbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (existingUser != null) return null;
+
+            displayname ??= $"{firstname} {lastname}"; 
 
             var user = new User
             {
                 Username = username,
                 PasswordHash = HashPassword(password),
-                Role = role
+                Role = role,
+                Firstname = firstname,
+                Lastname = lastname,
+                Displayname = displayname,
+                ProfilePictureUrl = profilepictureurl
             };
 
             _DbContext.Users.Add(user);
@@ -103,6 +109,42 @@ namespace KAEGoalWebAPI.Services
         private bool VerifyPassword(string password, string storedPasswordHash)
         {
             return storedPasswordHash == HashPassword(password);
+        }
+
+        public async Task<bool> UpdateProfile(int userId, UpdateProfileModel model)
+        {
+            var user = await _DbContext.Users.FindAsync(userId);
+            if (user == null) 
+                return false;
+
+            if (!string.IsNullOrEmpty(model.Firstname))
+                user.Firstname = model.Firstname;
+            if (!string.IsNullOrEmpty(model.Lastname))
+                user.Lastname = model.Lastname;
+            if (!string.IsNullOrEmpty(model.Displayname))
+                user.Displayname = model.Displayname;
+            if (!string.IsNullOrEmpty(model.ProfilePictureUrl))
+                user.ProfilePictureUrl = model.ProfilePictureUrl;
+
+            _DbContext.Users.Update(user);
+            await _DbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<UserDetailModel> GetUserDetails(int userId)
+        {
+            var user = await _DbContext.Users.FindAsync(userId);
+            if (user == null) return null;
+
+            return new UserDetailModel
+            {
+                Username = user.Username,
+                Firstname = user.Firstname,
+                Lastname = user.Lastname,
+                Displayname = user.Displayname,
+                ProfilePictureUrl = user.ProfilePictureUrl
+            };
         }
     }
 }
