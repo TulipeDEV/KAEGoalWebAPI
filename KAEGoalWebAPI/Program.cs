@@ -12,6 +12,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<CoinService>();
 builder.Services.AddScoped<RewardService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IWorkplaceService, WorkplaceService>();
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>

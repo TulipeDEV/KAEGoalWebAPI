@@ -79,5 +79,30 @@ namespace KAEGoalWebAPI.Controllers
 
             return Ok(userDetails);
         }
+
+        [HttpPut("admin/update-user-details")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUserDetails([FromBody] AdminUpdateUserDeltailsModel model)
+        {
+            if (model.UserId <= 0 || model.DepartmentId <= 0 || model.WorkplaceId <= 0)
+                return BadRequest("Invalid input data.");
+
+            try
+            {
+                var isUpdated = await _authService.UpdateUserDetailsAsync(model);
+                if (!isUpdated)
+                    return NotFound("User not found.");
+
+                return Ok("User details updated successfully.");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Interal server errror: {ex.Message}");
+            }
+        }
     }
 }

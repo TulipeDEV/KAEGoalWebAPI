@@ -134,7 +134,10 @@ namespace KAEGoalWebAPI.Services
 
         public async Task<UserDetailModel> GetUserDetails(int userId)
         {
-            var user = await _DbContext.Users.FindAsync(userId);
+            var user = await _DbContext.Users
+                .Include(u => u.Department)
+                .Include(u => u.Workplace)
+                .FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return null;
 
             return new UserDetailModel
@@ -143,8 +146,34 @@ namespace KAEGoalWebAPI.Services
                 Firstname = user.Firstname,
                 Lastname = user.Lastname,
                 Displayname = user.Displayname,
-                ProfilePictureUrl = user.ProfilePictureUrl
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                Department = user.Department?.Name,
+                Workplace = user.Workplace?.Name
             };
+        }
+
+        public async Task<bool> UpdateUserDetailsAsync(AdminUpdateUserDeltailsModel model)
+        {
+            var user = await _DbContext.Users
+                .Include(u => u.Department)
+                .Include(u => u.Workplace)
+                .FirstOrDefaultAsync(u => u.Id == model.UserId);
+
+            if (user == null) return false;
+
+            var department = await _DbContext.Departments.FindAsync(model.DepartmentId);
+            var workplace = await _DbContext.Workplaces.FindAsync(model.WorkplaceId);
+
+            if (department == null || workplace == null)
+                throw new ArgumentException("Invalid DepartmentId or WorkplaceId.");
+
+            user.DepartmentId = model.DepartmentId;
+            user.WorkplaceId = model.WorkplaceId;
+
+            _DbContext.Users.Update(user);
+            await _DbContext.SaveChangesAsync();
+
+            return true;
         }
     }
 }

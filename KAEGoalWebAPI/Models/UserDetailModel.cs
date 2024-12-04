@@ -8,5 +8,7 @@
         public string Lastname { get; set; }
         public string Displayname { get; set; }
         public string ProfilePictureUrl { get; set; }
+        public string Department { get; set; }
+        public string Workplace { get; set; }  
     }
 }

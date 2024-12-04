@@ -9,7 +9,7 @@ namespace KAEGoalWebAPI.Services
         Task<string> RefreshToken(string refreshtoken);
         Task<bool> UpdateProfile(int userId, UpdateProfileModel model);
         Task<UserDetailModel> GetUserDetails(int userId);
-
+        Task<bool> UpdateUserDetailsAsync(AdminUpdateUserDeltailsModel model);
 
     }
 }
