@@ -19,6 +19,8 @@ namespace KAEGoalWebAPI.Models
         public string Lastname { get; set; }
         public string ProfilePictureUrl { get; set; }
         public ICollection<Coin> Coins { get; set; } = new List<Coin>();
+        public ICollection<UserReward> UserRewards { get; set; }
+
 
         public int? DepartmentId { get; set; }
         public Department Department { get; set; }

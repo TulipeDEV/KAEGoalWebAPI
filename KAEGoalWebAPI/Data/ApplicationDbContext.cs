@@ -15,5 +15,30 @@ namespace KAEGoalWebAPI.Data
         public DbSet<Reward> Rewards { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Workplace> Workplaces { get; set; }
+        public DbSet<RewardStatusEntity> RewardStatuses { get; set; }
+        public DbSet<UserReward> UserRewards { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            RewardStatusSeeder.SeedRewardStatuses(modelBuilder);
+
+            modelBuilder.Entity<UserReward>()
+            .HasOne(ur => ur.User)
+            .WithMany(u => u.UserRewards)
+            .HasForeignKey(ur => ur.UserId);
+
+            modelBuilder.Entity<UserReward>()
+                .HasOne(ur => ur.Reward)
+                .WithMany(r => r.UserRewards)
+                .HasForeignKey(ur => ur.RewardId);
+
+            modelBuilder.Entity<UserReward>()
+                .HasOne(ur => ur.StatusNavigation)  // Foreign key to RewardStatusEntity
+                .WithMany()
+                .HasForeignKey(ur => ur.Status);
+        }
     }
 }

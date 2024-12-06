@@ -10,6 +10,7 @@ namespace KAEGoalWebAPI.Services
         Task<bool> UpdateProfile(int userId, UpdateProfileModel model);
         Task<UserDetailModel> GetUserDetails(int userId);
         Task<bool> UpdateUserDetailsAsync(AdminUpdateUserDeltailsModel model);
+        Task<IEnumerable<CointransactionModel>> GetUserTransactions(int userId, int pageNumber, int pageSize);
 
     }
 }

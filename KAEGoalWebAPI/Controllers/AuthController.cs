@@ -104,5 +104,17 @@ namespace KAEGoalWebAPI.Controllers
                 return StatusCode(500, $"Interal server errror: {ex.Message}");
             }
         }
+
+        [HttpGet("user-transactions")]
+        [Authorize]
+        public async Task<IActionResult> GetUserTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized("Invalid token.");
+
+            var transactions = await _authService.GetUserTransactions(int.Parse(userId), pageNumber, pageSize);
+            return Ok(transactions);
+        }
     }
 }

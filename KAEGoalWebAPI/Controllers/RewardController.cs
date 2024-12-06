@@ -28,7 +28,8 @@ namespace KAEGoalWebAPI.Controllers
                 Name = r.Name,
                 Description = r.Description,
                 Cost = r.Cost,
-                ImageUrl = r.ImageUrl
+                ImageUrl = r.ImageUrl,
+                Quantity = r.Quantity
             }).ToList();
 
             return Ok(RewardRequestModels);
@@ -49,7 +50,8 @@ namespace KAEGoalWebAPI.Controllers
                 Name = reward.Name,
                 Description = reward.Description,
                 Cost = reward.Cost,
-                ImageUrl = reward.ImageUrl
+                ImageUrl = reward.ImageUrl,
+                Quantity = reward.Quantity
             };
 
             return Ok(rewardRequestModel);
@@ -65,6 +67,7 @@ namespace KAEGoalWebAPI.Controllers
                 Description = model.Description,
                 Cost = (int)model.Cost,
                 ImageUrl = model.ImageUrl,
+                Quantity = model.Quantity
             };
 
             await _rewardService.AddRewardAsync(reward);
@@ -115,21 +118,42 @@ namespace KAEGoalWebAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateReward(int rewardid, [FromBody] RewardUpdateModel model)
         {
-            var reward = new Reward
-            {
-                Name = model.Name,
-                Description = model.Description,
-                Cost = (int)model.Cost,
-                ImageUrl = model.ImageUrl
-            };
+            var result = await _rewardService.UpdateRewardAsync(rewardid, model);
 
-            var result = await _rewardService.RewardUpdateAsync(rewardid, reward);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
 
-            return Ok(new { message = result.Message });
+            return Ok(new { message = result.Message});
+        }
+
+        [HttpPut("admin/reward/{userRewardId}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateRewardStatus(int userRewardId, [FromBody] int newStatusId)
+        {
+            var success = await _rewardService.UpdateRewardStatusAsync(userRewardId, newStatusId);
+
+            if (!success)
+            {
+                return BadRequest("Invalid reward or status.");
+            }
+
+            return Ok(new { message = "Reward status updated successfully" });
+        }
+
+        [HttpGet("user/reward/{userRewardId}/status")]
+        [Authorize]
+        public async Task<IActionResult> GetUserRewardStatus(int userRewardId)
+        {
+            var status = await _rewardService.GetUserRewardStatusAsync(userRewardId);
+
+            if (status == null)
+            {
+                return NotFound("User reward not found.");
+            }
+
+            return Ok(new { status }  );
         }
     }
 }

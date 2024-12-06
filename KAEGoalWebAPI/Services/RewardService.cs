@@ -42,6 +42,9 @@ namespace KAEGoalWebAPI.Services
                 return (false, "Reward not found");
             }
 
+            if (reward.Quantity <= 0)
+                return (false, "Reward is out of stock");
+
             if (user.Coins == null || !user.Coins.Any())
             {
                 return (false, "User does not have any coins");
@@ -59,21 +62,32 @@ namespace KAEGoalWebAPI.Services
             }
 
             userCoin.Balance -= reward.Cost;
+            reward.Quantity--;
 
             var transaction = new CoinTransaction
             {
                 UserId = userId,
                 CoinTypeId = userCoin.CoinTypeId,
-                Amount = reward.Cost,
+                Amount = -reward.Cost,
                 TransactionType = "Redeem",
                 TransactionDate = DateTime.UtcNow,
                 Description = $"Redeemed reward: {reward.Name}"
             };
 
             _DbContext.CoinTransactions.Add(transaction);
+
+            var userReward = new UserReward
+            {
+                UserId = userId,
+                RewardId = rewardId,
+                Status = 1
+            };
+
+            _DbContext.UserRewards.Add(userReward);
+
             await _DbContext.SaveChangesAsync();
 
-            return (true, "Reward redeemed successfully");
+            return (true, "Reward redeemed successfully. Initial status: Reward Requested");
         }
 
         public async Task AddRewardAsync(Reward reward)
@@ -108,6 +122,72 @@ namespace KAEGoalWebAPI.Services
 
             await _DbContext.SaveChangesAsync();
             return (true, "Reward updated successfully");
+        }
+
+        public async Task<bool> UpdateRewardStatusAsync(int userRewardId, int newStatusId)
+        {
+            var userReward = await _DbContext.UserRewards.FindAsync(userRewardId);
+            if (userReward == null)
+            {
+                return false;
+            }
+
+            var rewardStatus = await _DbContext.RewardStatuses.FindAsync(newStatusId);
+            if (rewardStatus == null)
+            {
+                return false;
+            }
+
+            userReward.Status = newStatusId;
+            _DbContext.UserRewards.Update(userReward);
+            await _DbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<UserRewardStatusModel> GetUserRewardStatusAsync(int userRewardId)
+        {
+            var userReward = await _DbContext.UserRewards
+                .Include(ur => ur.StatusNavigation)
+                .Include(ur => ur.Reward)
+                .FirstOrDefaultAsync(ur => ur.Id == userRewardId);
+
+            if (userReward == null)
+            {
+                return (null);
+            }
+
+            return new UserRewardStatusModel
+            {
+                RewardName = userReward.Reward?.Name,
+                StatusName = userReward.StatusNavigation?.Name
+            };
+        }
+
+        public async Task<(bool Success, string Message)> UpdateRewardAsync(int rewardId, RewardUpdateModel model)
+        {
+            var reward = await _DbContext.Rewards.FindAsync(rewardId);
+
+            if (reward == null)
+            {
+                return (false, "Reward not found");
+            }
+
+            reward.Name = model.Name;
+            reward.Description = model.Description;
+            reward.Cost = (int)model.Cost;
+            reward.ImageUrl = model.ImageUrl;
+            reward.Quantity = model.Quantity;
+
+            try
+            {
+                await _DbContext.SaveChangesAsync();
+                return (true, "Reward updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error updating reward: {ex.Message}");
+            }
         }
     }
 }

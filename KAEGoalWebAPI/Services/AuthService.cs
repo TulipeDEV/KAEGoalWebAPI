@@ -175,5 +175,25 @@ namespace KAEGoalWebAPI.Services
 
             return true;
         }
+
+        public async Task<IEnumerable<CointransactionModel>> GetUserTransactions(int userId, int pageNumber, int pageSize)
+        {
+            var transactions = await _DbContext.CoinTransactions
+                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.TransactionDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(t => t.CoinType)
+                .ToListAsync();
+
+            return transactions.Select(t => new CointransactionModel
+            {
+                CoinType = t.CoinType?.Name ?? "Unknown",
+                Amount = t.Amount,
+                TransactionType = t.TransactionType,
+                TransactionDate = t.TransactionDate,
+                Description = t.Description,
+            }).ToList();
+        }
     }
 }

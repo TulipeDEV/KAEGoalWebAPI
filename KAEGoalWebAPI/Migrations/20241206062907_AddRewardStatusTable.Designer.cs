@@ -4,6 +4,7 @@ using KAEGoalWebAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KAEGoalWebAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241206062907_AddRewardStatusTable")]
+    partial class AddRewardStatusTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,9 +170,6 @@ namespace KAEGoalWebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Rewards");
@@ -270,34 +270,6 @@ namespace KAEGoalWebAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("KAEGoalWebAPI.Models.UserReward", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("RewardId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RewardId");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserRewards");
-                });
-
             modelBuilder.Entity("KAEGoalWebAPI.Models.Workplace", b =>
                 {
                     b.Property<int>("Id")
@@ -379,48 +351,14 @@ namespace KAEGoalWebAPI.Migrations
                     b.Navigation("Workplace");
                 });
 
-            modelBuilder.Entity("KAEGoalWebAPI.Models.UserReward", b =>
-                {
-                    b.HasOne("KAEGoalWebAPI.Models.Reward", "Reward")
-                        .WithMany("UserRewards")
-                        .HasForeignKey("RewardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KAEGoalWebAPI.Models.RewardStatusEntity", "StatusNavigation")
-                        .WithMany()
-                        .HasForeignKey("Status")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KAEGoalWebAPI.Models.User", "User")
-                        .WithMany("UserRewards")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Reward");
-
-                    b.Navigation("StatusNavigation");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("KAEGoalWebAPI.Models.Department", b =>
                 {
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("KAEGoalWebAPI.Models.Reward", b =>
-                {
-                    b.Navigation("UserRewards");
-                });
-
             modelBuilder.Entity("KAEGoalWebAPI.Models.User", b =>
                 {
                     b.Navigation("Coins");
-
-                    b.Navigation("UserRewards");
                 });
 
             modelBuilder.Entity("KAEGoalWebAPI.Models.Workplace", b =>
