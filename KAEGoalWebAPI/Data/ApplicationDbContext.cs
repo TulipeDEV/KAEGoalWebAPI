@@ -17,6 +17,9 @@ namespace KAEGoalWebAPI.Data
         public DbSet<Workplace> Workplaces { get; set; }
         public DbSet<RewardStatusEntity> RewardStatuses { get; set; }
         public DbSet<UserReward> UserRewards { get; set; }
+        public DbSet<Mission> Missions { get; set; }
+        public DbSet<CodeMission> CodeMissions { get; set; }
+        public DbSet<UserMission> UserMissions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

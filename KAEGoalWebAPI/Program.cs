@@ -14,6 +14,7 @@ builder.Services.AddScoped<CoinService>();
 builder.Services.AddScoped<RewardService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IWorkplaceService, WorkplaceService>();
+builder.Services.AddScoped<IMissionService, MissionService>();
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
